@@ -5,7 +5,26 @@
 
 import scrapy
 from scrapy.loader import ItemLoader
-from itemloaders.processors import TakeFirst
+from itemloaders.processors import TakeFirst,MapCompose,Identity,Join
+import re
+
+
+price_pattern=r'￥([\d,]+)[^\d]*\(税込￥([\d,]+)\)'
+# '￥9,800 (税込￥10,780)'
+def get_price(price_text):
+    res=re.match(price_pattern,price_text)
+    if res:
+        return float(res.group(1).replace(',',''))
+    return None
+def get_price_taxed(price_text):
+    res=re.match(price_pattern,price_text)
+    if res:
+        return float(res.group(2).replace(',',''))
+    return None
+
+
+
+
 
 class GetchuItem(scrapy.Item):
     getchu_id=scrapy.Field()
@@ -28,7 +47,23 @@ class GetchuItem(scrapy.Item):
 
 class GetchuItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
+    price_in=MapCompose(get_price)
+    price_taxed_in=MapCompose(get_price_taxed)
 
+
+
+def filter_subgenre_list(input_list):
+    res=list(filter(lambda x : '一覧' not in x ,input_list))
+    return res
+
+def debug_processor(input):
+    print('input',input)
+    return input
+def join_and_strip(input_list):
+    # print('input',input_list)
+    return ''.join(input_list).strip()
+def is_true(input):
+    return input=='1'
 
 
 
@@ -45,12 +80,15 @@ class GameItem(GetchuItem):
     painter_list=scrapy.Field()
     # シナリオ
     scenario_list=scrapy.Field()
+    # 音楽
+    musician_list = scrapy.Field()
     # カテゴリ, 也就是标签
     category_list=scrapy.Field()
     # 商品同梱特典
     specials=scrapy.Field()
     # 封面url
     cover_url=scrapy.Field()
+    cover_url_hd=scrapy.Field()
     # 製品仕様／動作環境
     system_requirements=scrapy.Field()
     # 備考
@@ -58,7 +96,7 @@ class GameItem(GetchuItem):
     # 根据r18的提示判断是否r18作品
     is_r18=scrapy.Field()
     # ストーリー
-    stroy=scrapy.Field()
+    story=scrapy.Field()
     # 角色列表，包含角色名，读音，cv， 角色描述，角色图片，全身图
     # 还包括角色参数，3维，身高，罩杯
     # 其中name_text是未处理的文本。
@@ -70,12 +108,11 @@ class GameItem(GetchuItem):
     #  'img': chara_img,
     #  }
 
-    # 3サイズ
-    # height,cup_size,BWH，img_whole
+    # img_whole
 
     chara_list=scrapy.Field()
     # 示例图片列表
-    sampleimg_list=scrapy.Field()
+    sample_img_list=scrapy.Field()
 
     # 'duration':duration,
     # 'goods_introduction':goods_introduction,
@@ -85,7 +122,21 @@ class GameItem(GetchuItem):
     # 'painter_writer_list':painter_writer_list
 
 
+
+
 class GameItemLoader(GetchuItemLoader):
+    subgenre_list_out=filter_subgenre_list
+    painter_list_out=Identity()
+    scenario_list_out=Identity()
+    category_list_out=filter_subgenre_list
+    system_requirements_in=join_and_strip
+    is_r18_in=MapCompose(is_true)
+    story_in=join_and_strip
+    # story_in=debug_processor
+    # strory_out=Identity()
+    musician_list_out=Identity()
+    chara_list_out=Identity()
+    sample_img_list_out=Identity()
     pass
 class AnimeItem(GetchuItem):
     pass
