@@ -23,7 +23,18 @@ def get_price_taxed(price_text):
     return None
 
 
+def filter_subgenre_list(input_list):
+    res=list(filter(lambda x : '一覧' not in x ,input_list))
+    return res
 
+def debug_processor(input):
+    print('input',input)
+    return input
+def join_and_strip(input_list):
+    # print('input',input_list)
+    return ''.join(input_list).strip()
+def is_true(input):
+    return input=='1'
 
 
 class GetchuItem(scrapy.Item):
@@ -45,37 +56,41 @@ class GetchuItem(scrapy.Item):
     # JANコード 商品码
     jan_code=scrapy.Field()
 
-class GetchuItemLoader(ItemLoader):
-    default_output_processor = TakeFirst()
-    price_in=MapCompose(get_price)
-    price_taxed_in=MapCompose(get_price_taxed)
+    # 封面url
+    cover_url=scrapy.Field()
+    cover_url_hd=scrapy.Field()
+    # 根据r18的提示判断是否r18作品
+    is_r18=scrapy.Field()
 
+    # 示例图片列表
+    sample_img_list=scrapy.Field()
 
+    # 品番： 比如HTL-2301
+    product_code=scrapy.Field()
 
-def filter_subgenre_list(input_list):
-    res=list(filter(lambda x : '一覧' not in x ,input_list))
-    return res
-
-def debug_processor(input):
-    print('input',input)
-    return input
-def join_and_strip(input_list):
-    # print('input',input_list)
-    return ''.join(input_list).strip()
-def is_true(input):
-    return input=='1'
-
-
-
-class GameItem(GetchuItem):
+    # 商品紹介
+    intro=scrapy.Field()
 
     # ジャンル  一句话的类别,和category的区别是比较粗的分类、
     genre=scrapy.Field()
     # サブジャンル 子类别
     subgenre_list=scrapy.Field()
 
-    # 品番： 比如HTL-2301
-    product_code=scrapy.Field()
+
+class GetchuItemLoader(ItemLoader):
+    default_output_processor = TakeFirst()
+    price_in=MapCompose(get_price)
+    price_taxed_in=MapCompose(get_price_taxed)
+    is_r18_in=MapCompose(is_true)
+    sample_img_list_out=Identity()
+
+    intro_in=join_and_strip
+    subgenre_list_out=filter_subgenre_list
+
+
+
+
+class GameItem(GetchuItem):
     # 原画
     painter_list=scrapy.Field()
     # シナリオ
@@ -86,15 +101,12 @@ class GameItem(GetchuItem):
     category_list=scrapy.Field()
     # 商品同梱特典
     specials=scrapy.Field()
-    # 封面url
-    cover_url=scrapy.Field()
-    cover_url_hd=scrapy.Field()
+
     # 製品仕様／動作環境
     system_requirements=scrapy.Field()
     # 備考
     bikou=scrapy.Field()
-    # 根据r18的提示判断是否r18作品
-    is_r18=scrapy.Field()
+
     # ストーリー
     story=scrapy.Field()
     # 角色列表，包含角色名，读音，cv， 角色描述，角色图片，全身图
@@ -111,8 +123,7 @@ class GameItem(GetchuItem):
     # img_whole
 
     chara_list=scrapy.Field()
-    # 示例图片列表
-    sample_img_list=scrapy.Field()
+
 
     # 'duration':duration,
     # 'goods_introduction':goods_introduction,
@@ -125,18 +136,74 @@ class GameItem(GetchuItem):
 
 
 class GameItemLoader(GetchuItemLoader):
-    subgenre_list_out=filter_subgenre_list
     painter_list_out=Identity()
     scenario_list_out=Identity()
     category_list_out=filter_subgenre_list
     system_requirements_in=join_and_strip
-    is_r18_in=MapCompose(is_true)
     story_in=join_and_strip
     # story_in=debug_processor
     # strory_out=Identity()
     musician_list_out=Identity()
     chara_list_out=Identity()
-    sample_img_list_out=Identity()
-    pass
+    
 class AnimeItem(GetchuItem):
+    # 根据r18的提示判断是否r18作品
+    # is_r18=scrapy.Field()
+    # intro=scrapy.Field()
+    # 品番： 比如HTL-2301
+    # product_code=scrapy.Field()
+    staff=scrapy.Field()
+
+
+class AnimeItemLoader(GetchuItemLoader):
+    # intro_in=join_and_strip
+    staff_in=join_and_strip
+
+class AdultAnimeItem(AnimeItem):
+    pass
+class AdultAnimeItemLoader(AnimeItemLoader):
+    pass
+    
+
+class MusicItem(GetchuItem):
+    pass
+
+class MusicItemLoader(GameItemLoader):
+    pass
+
+class GoodsItem(GetchuItem):
+    pass
+
+class GoodsItemLoader(GetchuItemLoader):
+    pass
+
+
+class BookItem(GetchuItem):
+    ISBN_13=scrapy.Field()
+
+class BookItemLoader(GetchuItemLoader):
+    pass
+    
+class DoujinItem(GetchuItem):
+    chara_list=scrapy.Field()
+    circle=scrapy.Field()
+    painter_list=scrapy.Field()
+    scenario_list=scrapy.Field()
+    category_list=scrapy.Field()
+    musician_list=scrapy.Field()
+    bikou=scrapy.Field()
+    system_requirements=scrapy.Field()
+
+class DoujinItemLoader(GetchuItemLoader):
+    chara_list_out=Identity()
+    circle_in=MapCompose(str.strip)
+    painter_list_out=Identity()
+    scenario_list_out=Identity()
+    category_list_out=filter_subgenre_list
+    musician_list_out=Identity()
+
+
+class CosplayItem(DoujinItem):
+    pass
+class CosplayItemLoader(DoujinItemLoader):
     pass

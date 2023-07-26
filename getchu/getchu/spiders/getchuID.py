@@ -1,7 +1,8 @@
 import re
 import scrapy
 from getchu.items import join_and_strip
-from getchu.items import GameItem, GameItemLoader, GetchuItem
+# from getchu.items import GameItem, GameItemLoader, GetchuItem,AnimeItem, AnimeItemLoader,AdultAnimeItem,AdultAnimeItemLoader
+from getchu.items import *
 from itemloaders import ItemLoader
 from scrapy.exceptions import CloseSpider
 class getchuIDSpider(scrapy.Spider):
@@ -42,7 +43,7 @@ class getchuIDSpider(scrapy.Spider):
             '/goods': 'goods',
             '/goods/dakimakura.html': 'dakimakura',
             '/books/': 'books',
-            '/doujin': 'doujin',
+            '/doujin/': 'doujin',
             '/doujin/cosplay.html': 'cosplay',
             '/dvdpg/': 'dvdpg',
             '/dl/': 'dl',
@@ -63,8 +64,20 @@ class getchuIDSpider(scrapy.Spider):
         common_dict['price_taxed']=price
         common_dict['midea']=soft_table.xpath('//td[contains(text(),"メディア")]/following-sibling::td/text()').get()
         common_dict['on_sale']=soft_table.xpath('//td[contains(text(),"発売日")]/following-sibling::td/a/text()').get()
-        common_dict['jan_code']=soft_table.xpath('//td[contains(text(),"ブランド")]/following-sibling::td/text()').get()
+        common_dict['jan_code']=soft_table.xpath('//td[contains(text(),"JANコード")]/following-sibling::td/text()').get()
+        common_dict['is_r18']= soft_table.xpath('//span[contains(@class,"redb") and contains(text(),"18歳未満の方は購入できません")] = true()').get()
 
+        common_dict['cover_url']=soft_table.xpath('//tr[1]//a[@class="highslide"]/img/@src').get()
+        common_dict['cover_url_hd']=soft_table.xpath('//tr[1]//a[@class="highslide"]/@href').get()
+        common_dict['sample_img_list']=response.xpath('//div[contains(@class,"tabletitle") and contains(text(),"サンプル画像")]/following-sibling::div[1]//a/@href').getall()
+
+        common_dict['product_code']=response.xpath('//td[contains(text(),"品番")]/following-sibling::td/text()').get()
+        common_dict['tab_type'] = self.tabTypeParse(response)
+
+        common_dict['genre']=response.xpath('//td[contains(text(),"ジャンル")]/following-sibling::td/text()').get()
+        common_dict['subgenre_list']=response.xpath('//td[contains(text(),"サブジャンル")]/following-sibling::td/a/text()').getall()
+
+        common_dict['intro']=response.xpath('//div[contains(@class,"tabletitle") and contains(text(),"紹介")]/following-sibling::div[1]//text()').getall()
         brand_a=soft_table.xpath('//td[contains(text(),"ブランド")]/following-sibling::td/a')
         if len(brand_a)>1:
             common_dict['brand']=brand_a.xpath('./text()').get()
@@ -117,6 +130,7 @@ class getchuIDSpider(scrapy.Spider):
     def parse(self, response):
         tab_type = self.tabTypeParse(response)
         self.logger.debug(f'tab_type:{tab_type} ')
+        
         if tab_type == 'game':
             l = GameItemLoader(item=GameItem(), response=response)
             #  GetchuItem
@@ -130,9 +144,9 @@ class getchuIDSpider(scrapy.Spider):
             # l.add_value('on_sale', common_dict['on_sale'])
             # l.add_value('jan_code', common_dict['jan_code'])
             soft_table=l.nested_xpath('//table[@id="soft_table"]')
-            soft_table.add_xpath('genre','//td[contains(text(),"ジャンル")]/following-sibling::td/text()')
-            soft_table.add_xpath('subgenre_list','//td[contains(text(),"サブジャンル")]/following-sibling::td/a/text()')
-            soft_table.add_xpath('product_code','//td[contains(text(),"品番")]/following-sibling::td/text()')
+            # soft_table.add_xpath('genre','//td[contains(text(),"ジャンル")]/following-sibling::td/text()')
+            # soft_table.add_xpath('subgenre_list','//td[contains(text(),"サブジャンル")]/following-sibling::td/a/text()')
+            # soft_table.add_xpath('product_code','//td[contains(text(),"品番")]/following-sibling::td/text()')
             soft_table.add_xpath('painter_list','//td[contains(text(),"原画")]/following-sibling::td/a/text()')
             soft_table.add_xpath('scenario_list','//td[contains(text(),"シナリオ")]/following-sibling::td/a/text()')
             soft_table.add_xpath('musician_list','//td[contains(text(),"音楽")]/following-sibling::td/text()')
@@ -141,14 +155,53 @@ class getchuIDSpider(scrapy.Spider):
             soft_table.add_xpath('bikou','//fieldset//legend[contains(text(),"備考")]/following-sibling::div//span/text()')
             soft_table.add_xpath('system_requirements','//legend[contains(text(),"製品仕様")]/following-sibling::table//text()')
 
-            soft_table.add_xpath('cover_url_hd','//tr[1]//a[@class="highslide"]/@href')
-            soft_table.add_xpath('cover_url','//tr[1]//a[@class="highslide"]/img/@src')
-            soft_table.add_xpath('is_r18','//span[contains(@class,"redb") and contains(text(),"18歳未満の方は購入できません")] = true()')
-
-            # l.add_xpath('story','//div[contains(@class,"tabletitle") and contains(text(),"ストーリー")]/following-sibling::div//text()')
+            
+            # soft_table.add_xpath('cover_url_hd','//tr[1]//a[@class="highslide"]/@href')
+            # soft_table.add_xpath('cover_url','//tr[1]//a[@class="highslide"]/img/@src')
+            l.add_xpath('story','//div[contains(@class,"tabletitle") and contains(text(),"ストーリー")]/following-sibling::div[1]//text()')
             self.parse_chara_list(response=response,loader=l)
-            l.add_xpath("sample_img_list",'//div[contains(@class,"tabletitle") and contains(text(),"サンプル画像")]/following-sibling::div[1]//a/@href')
+            # l.add_xpath("sample_img_list",'//div[contains(@class,"tabletitle") and contains(text(),"サンプル画像")]/following-sibling::div[1]//a/@href')
             return l.load_item()
+        elif tab_type=='anime' or tab_type=='adult_anime':
+            if tab_type=='anime':
+                l= AnimeItemLoader(item=AnimeItem(),response=response)
+            else:
+                l=AdultAnimeItemLoader(item=AdultAnimeItem(),response=response)
+            self.extract_common(response=response,loader=l)
+            soft_table=l.nested_xpath('//table[@id="soft_table"]')
+            # soft_table.add_xpath('product_code','//td[contains(text(),"品番")]/following-sibling::td/text()')
+            # l.add_xpath('intro','//div[contains(@class,"tabletitle") and contains(text(),"商品紹介")]/following-sibling::div[1]//text()')
+            l.add_xpath('staff','//div[contains(@class,"tabletitle") and contains(text(),"スタッフ")]/following-sibling::div[1]//text()')
+            return l.load_item()
+        elif tab_type=='music' or tab_type=='goods' or tab_type=='dakimakura' or tab_type=='books':
+            if tab_type=='music':
+                l=MusicItemLoader(item=MusicItem(),response=response)
+            elif tab_type=='goods':
+                l=GoodsItemLoader(item=GoodsItem(),response=response)
+            elif tab_type=='dakimakura':
+                l=GoodsItemLoader(item=GoodsItem(),response=response)
+            elif tab_type=='books':
+                l=BookItemLoader(item=BookItem(),response=response)
+                l.add_xpath('ISBN_13','//td[contains(text(),"ISBN-13")]/following-sibling::td/text()')
+            self.extract_common(response=response,loader=l)
+            return l.load_item()
+        elif tab_type=='doujin':
+            l=DoujinItemLoader(item=DoujinItem(),response=response)
+            self.extract_common(response=response,loader=l)
+            self.parse_chara_list(response=response,loader=l)
+            soft_table=l.nested_xpath('//table[@id="soft_table"]')
+            # soft_table.add_xpath('genre','//td[contains(text(),"ジャンル")]/following-sibling::td/text()')
+            # soft_table.add_xpath('subgenre_list','//td[contains(text(),"サブジャンル")]/following-sibling::td/a/text()')
+            # soft_table.add_xpath('product_code','//td[contains(text(),"品番")]/following-sibling::td/text()')
+            soft_table.add_xpath('painter_list','//td[contains(text(),"原画")]/following-sibling::td/a/text()')
+            soft_table.add_xpath('scenario_list','//td[contains(text(),"シナリオ")]/following-sibling::td/a/text()')
+            soft_table.add_xpath('musician_list','//td[contains(text(),"音楽")]/following-sibling::td/text()')
+            soft_table.add_xpath('category_list','//td[contains(text(),"カテゴリ")]/following-sibling::td/a/text()')
+            soft_table.add_xpath('bikou','//fieldset//legend[contains(text(),"備考")]/following-sibling::div//span/text()')
+            soft_table.add_xpath('system_requirements','//legend[contains(text(),"製品仕様")]/following-sibling::table//text()')
+            l.add_xpath('circle','//td[contains(text(),"サークル")]/following-sibling::td[1]/text()')
+            return l.load_item()
+            
         elif tab_type == 'unknown':
             l = ItemLoader(item=GetchuItem(), response=response)
             l.add_value('tab_type', tab_type)
