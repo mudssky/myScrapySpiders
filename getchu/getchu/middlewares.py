@@ -4,6 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.downloadermiddlewares.httpcache import HttpCacheMiddleware
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
@@ -101,3 +102,10 @@ class GetchuDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
+
+
+# class CustomHttpCacheMiddleware(HttpCacheMiddleware):
+#     def process_request_exception(self, request, exception, spider):
+#         # 记录出错的request,第二次执行时重新缓存
+#         self.cache.expire(request)
+#         return None

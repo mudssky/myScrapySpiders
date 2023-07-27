@@ -8,6 +8,7 @@ readme = "README.md"
 
 [tool.black]
 skip-string-normalization = true
+line-length = 200
 
 [tool.ruff]
 line-length = 200
@@ -16,6 +17,7 @@ line-length = 200
 python = "^3.11"
 ipython = "^8.14.0"
 black = "^23.7.0"
+pymongo = "^4.4.1"
 
 [tool.poetry.group.dev.dependencies]
 Scrapy = "^2.9.0"
