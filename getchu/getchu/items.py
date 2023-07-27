@@ -207,3 +207,9 @@ class CosplayItem(DoujinItem):
     pass
 class CosplayItemLoader(DoujinItemLoader):
     pass
+
+class PgItem(GameItem):
+    pass
+
+class PgItemLoader(GameItemLoader):
+    pass
