@@ -27,7 +27,7 @@ class getchuIDSpider(scrapy.Spider):
 
     def start_requests(self):
         for id in range(self.startID, self.endID):
-            getchu_url = r'http://www.getchu.com/soft.phtml?id=' + str(id) + '&gc=gc'
+            getchu_url = r'https://www.getchu.com/soft.phtml?id=' + str(id) + '&gc=gc'
             metaDict = {"getchu_id": id}
             yield scrapy.Request(getchu_url, callback=self.parse, meta=metaDict)
 
@@ -48,8 +48,8 @@ class getchuIDSpider(scrapy.Spider):
             '/goods/adult.html': 'adult_goods',
         }
 
-        self.logger.debug(f'tab_link:{tab_link} ')
-        self.logger.debug(tab_link in tab_type_dict)
+        # self.logger.debug(f'tab_link:{tab_link} ')
+        # self.logger.debug(tab_link in tab_type_dict)
         return tab_type_dict.get(tab_link) or 'unknown'
 
     def extract_common(self, response, loader=None):
@@ -128,7 +128,7 @@ class getchuIDSpider(scrapy.Spider):
 
     def parse(self, response):
         tab_type = self.tabTypeParse(response)
-        self.logger.debug(f'tab_type:{tab_type} ')
+        # self.logger.debug(f'tab_type:{tab_type} ')
 
         if tab_type == 'game' or tab_type == 'dvdpg' or tab_type == 'adult_goods':
             l = getchu_item.GameItemLoader(item=getchu_item.GameItem(), response=response)
