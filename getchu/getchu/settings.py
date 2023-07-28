@@ -97,3 +97,13 @@ HTTPCACHE_ENABLED = True
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+
+# log config
+# LOG_FILE = 'getchu.log'
+LOG_LEVEL = 'DEBUG'
+LOG_FILE_APPEND = True
+# LOG_FORMATTER = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
+LOG_ENABLED = True
+LOG_ENCODING = 'utf-8'
+# LOG_SHORT_NAMES
