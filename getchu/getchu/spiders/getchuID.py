@@ -20,6 +20,8 @@ class getchuIDSpider(scrapy.Spider):
             self.endID = int(end_id)
         self.logger.debug(f'startID: {start_id} ,endID: {end_id}')
         self.validate_argument()
+        # 2023年7月30日 星期日 10:37:47 目前发现有两种页面,一种是空的没东西，应该是因为这个id没有查到数据
+        # 还有一种是404页面，我估计是因为这个数据被删除了。
 
     def validate_argument(self):
         if self.startID == 1 and self.endID == 1:
