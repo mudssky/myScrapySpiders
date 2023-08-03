@@ -257,7 +257,8 @@ class getchuIDSpider(scrapy.Spider):
             return l.load_item()
 
         elif tab_type == 'unknown':
-            l = getchu_item.GetchuItemLoader(item=getchu_item.GetchuItem(), response=response)
+            l = getchu_item.UnknowItemLoader(item=getchu_item.UnknownItem(), response=response)
             l.add_value('tab_type', tab_type)
             l.add_value('getchu_id', response.meta['getchu_id'])
+            l.add_value('res_body_size', len(response.body))
             return l.load_item()

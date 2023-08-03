@@ -245,3 +245,12 @@ class PgItem(GameItem):
 
 class PgItemLoader(GameItemLoader):
     pass
+
+
+class UnknownItem(GetchuItem):
+    res_body_size = scrapy.Field()
+    pass
+
+
+class UnknowItemLoader(GetchuItemLoader):
+    pass
