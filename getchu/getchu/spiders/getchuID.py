@@ -40,7 +40,7 @@ class getchuIDSpider(scrapy.Spider):
             '/anime/': 'anime',
             '/anime/adult.html': 'adult_anime',
             '/music/': 'music',
-            '/goods': 'goods',
+            '/goods/': 'goods',
             '/goods/dakimakura.html': 'dakimakura',
             '/books/': 'books',
             '/doujin/': 'doujin',
@@ -48,6 +48,7 @@ class getchuIDSpider(scrapy.Spider):
             '/dvdpg/': 'dvdpg',
             '/dl/': 'dl',
             '/goods/adult.html': 'adult_goods',
+            '/top.html': "top",
         }
 
         # self.logger.debug(f'tab_link:{tab_link} ')
@@ -200,13 +201,15 @@ class getchuIDSpider(scrapy.Spider):
                 '//div[contains(@class,"tabletitle") and contains(text(),"スタッフ")]/following-sibling::div[1]//text()',
             )
             return l.load_item()
-        elif tab_type == 'music' or tab_type == 'goods' or tab_type == 'dakimakura' or tab_type == 'books':
+        elif tab_type == 'music' or tab_type == 'goods' or tab_type == 'dakimakura' or tab_type == 'books' or tab_type == 'top':
             if tab_type == 'music':
                 l = getchu_item.MusicItemLoader(item=getchu_item.MusicItem(), response=response)
             elif tab_type == 'goods':
                 l = getchu_item.GoodsItemLoader(item=getchu_item.GoodsItem(), response=response)
             elif tab_type == 'dakimakura':
                 l = getchu_item.GoodsItemLoader(item=getchu_item.GoodsItem(), response=response)
+            elif tab_type == 'top':
+                l = getchu_item.TopItemLoader(item=getchu_item.TopItem(), response=response)
             elif tab_type == 'books':
                 l = getchu_item.BookItemLoader(item=getchu_item.BookItem(), response=response)
                 l.add_xpath(

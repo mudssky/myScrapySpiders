@@ -191,6 +191,14 @@ class GoodsItemLoader(GetchuItemLoader):
     pass
 
 
+class TopItem(GetchuItem):
+    pass
+
+
+class TopItemLoader(GetchuItemLoader):
+    pass
+
+
 class BookItem(GetchuItem):
     ISBN_13 = scrapy.Field()
 
