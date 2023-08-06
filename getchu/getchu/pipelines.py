@@ -17,17 +17,19 @@ class GetchuPipeline:
 
 
 class MongoUpsertPipeline:
-    collection_name = "items"
+    mongo_collection_name = "items"
 
-    def __init__(self, mongo_uri, mongo_db):
+    def __init__(self, mongo_uri, mongo_db, mongo_collection_name):
         self.mongo_uri = mongo_uri
         self.mongo_db = mongo_db
+        self.mongo_collection_name = mongo_collection_name
 
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
             mongo_uri=crawler.settings.get("MONGO_URI"),
             mongo_db=crawler.settings.get("MONGO_DATABASE"),
+            mongo_collection_name=crawler.settings.get("MONGO_COLLECTION_NAME"),
         )
 
     def open_spider(self, spider):
@@ -42,7 +44,7 @@ class MongoUpsertPipeline:
         itemAd['updated_at'] = datetime.now()
         if not itemAd.get('getchu_id'):
             raise scrapy_exceptions.CloseSpider('insert db error,not getchu_id provide')
-        self.db[self.collection_name].update_one(
+        self.db[self.mongo_collection_name].update_one(
             {'getchu_id': itemAd.get('getchu_id')},
             {'$set': itemAd.asdict()},
             upsert=True,
