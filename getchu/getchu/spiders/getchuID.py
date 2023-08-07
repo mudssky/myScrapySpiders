@@ -37,69 +37,25 @@ class getchuIDSpider(scrapy.Spider):
         self.db = self.client[self.mongo_db]
         self.collection = self.db[self.mongo_collection_name]
 
-    def not_in_db_id_filter(func):
-        """过滤出数据库中目前没有的id
-
-        Args:
-            func (_type_): _description_
-        """
-
-        def wrapper(self, *args, **kwargs):
-            input_ids = func(self, *args, **kwargs)
-            db_existing_id_set = {x['getchu_id'] for x in self.collection.find({})}
-            for id in input_ids:
-                if id not in db_existing_id_set:
-                    yield id
-
-        return wrapper
-
-    def unknown_id_filter(func):
-        """过滤出unknown项目的id
-
-        Args:
-            func (_type_): _description_
-        """
-
-        def wrapper(self, *args, **kwargs):
-            input_ids = func(self, *args, **kwargs)
-            unknown_ids = {x['getchu_id'] for x in self.collection.find({'tab_type': 'unknown'})}
-            for id in input_ids:
-                if id in unknown_ids:
-                    yield id
-
-        return wrapper
-
-    def other_id_filter(func):
-        """过滤出unknown项目中的other id
-
-        Args:
-            func (_type_): _description_
-        """
-
-        def wrapper(self, *args, **kwargs):
-            input_ids = func(self, *args, **kwargs)
-            other_ids = {x['getchu_id'] for x in self.collection.find({'tab_type': 'unknown', 'res_body_size': {'$gt': 2000}})}
-            for id in input_ids:
-                if id in other_ids:
-                    yield id
-
-        return wrapper
-
-    def game_id_filter(func):
-        """过滤出unknown项目中的other id
-
-        Args:
-            func (_type_): _description_
-        """
-
-        def wrapper(self, *args, **kwargs):
-            input_ids = func(self, *args, **kwargs)
-            target_ids = {x['getchu_id'] for x in self.collection.find({'tab_type': 'game'})}
-            for id in input_ids:
-                if id in target_ids:
-                    yield id
-
-        return wrapper
+    def id_filter(*type):
+        def decorator(func):
+            def wrapper(self, *args, **kwargs):
+                input_ids = func(self, *args, **kwargs)
+                if type == 'other':
+                    target_ids = {x['getchu_id'] for x in self.collection.find({'tab_type': 'unknown', 'res_body_size': {'$gt': 2000}})}
+                    yield from (id for id in input_ids if id in target_ids)
+                elif type == 'game':
+                    target_ids = {x['getchu_id'] for x in self.collection.find({'tab_type': 'game'})}
+                    yield from (id for id in input_ids if id in target_ids)
+                elif type == 'unknown':
+                    target_ids = {x['getchu_id'] for x in self.collection.find({'tab_type': 'unknown'})}
+                    yield from (id for id in input_ids if id in target_ids)
+                elif type == 'not_in_db':
+                    # 过滤不在数据库中的id
+                    except_ids = {x['getchu_id'] for x in self.collection.find({})}
+                    yield from (id for id in input_ids if id not in except_ids)
+                else:
+                    raise CloseSpider('no id filter matched,type :{0}'.format(type))
 
     def get_ids(self):
         for id in range(self.start_id, self.end_id):
