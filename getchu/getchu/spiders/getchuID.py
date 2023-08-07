@@ -37,7 +37,7 @@ class getchuIDSpider(scrapy.Spider):
         self.db = self.client[self.mongo_db]
         self.collection = self.db[self.mongo_collection_name]
 
-    def id_filter(type):
+    def id_filter(type: str):
         def decorator(func):
             def wrapper(self, *args, **kwargs):
                 input_ids = func(self, *args, **kwargs)
@@ -61,12 +61,16 @@ class getchuIDSpider(scrapy.Spider):
 
         return decorator
 
+    @id_filter('game')
     def get_ids(self):
         for id in range(self.start_id, self.end_id):
             yield id
 
     def start_requests(self):
         self.connect_mongodb()
+        # ids = list(self.get_ids())
+        # print(ids, len(ids))
+        # raise CloseSpider('stop')
         for id in self.get_ids():
             getchu_url = r'https://www.getchu.com/soft.phtml?id=' + str(id) + '&gc=gc'
             metaDict = {"getchu_id": id}

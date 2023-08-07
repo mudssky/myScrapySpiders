@@ -28,7 +28,7 @@ CONCURRENT_REQUESTS = 32
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 0.5
+# DOWNLOAD_DELAY = 0.5
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -68,9 +68,11 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
     # "getchu.pipelines.GetchuPipeline": 300,
     "getchu.pipelines.GetchuPipeline": 300,
-    'getchu.pipelines.MongoUpsertPipeline': 800,
+    # 'getchu.pipelines.MongoUpsertPipeline': 800,
+    'getchu.pipelines.MyImagesPipeline': 900,
 }
 
+IMAGES_STORE = '.scrapy/images'
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 AUTOTHROTTLE_ENABLED = True
