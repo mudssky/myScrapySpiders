@@ -10,6 +10,7 @@ readme = "README.md"
 skip-string-normalization = true
 
 [tool.ruff]
+line-length = 200
 
 [tool.poetry.dependencies]
 python = "^3.11"

@@ -58,7 +58,7 @@ class GetchuItem(scrapy.Item):
     brand = scrapy.Field()
     brand_site = scrapy.Field()
     # メディア 媒体介质，比如dvd，只有非实物类的才有
-    midea = scrapy.Field()
+    media = scrapy.Field()
 
     # 発売日 发售日
     on_sale = scrapy.Field()
@@ -252,5 +252,5 @@ class UnknownItem(GetchuItem):
     pass
 
 
-class UnknowItemLoader(GetchuItemLoader):
+class UnknownItemLoader(GetchuItemLoader):
     pass

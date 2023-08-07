@@ -6,12 +6,13 @@
 
 # useful for handling different item types with a single interface
 from datetime import datetime
-from itemadapter import ItemAdapter
-import pymongo
-import scrapy.exceptions as scrapy_exceptions
-import scrapy
-from scrapy.pipelines.images import ImagesPipeline
 from urllib.parse import urljoin
+
+import pymongo
+import scrapy
+import scrapy.exceptions as scrapy_exceptions
+from itemadapter import ItemAdapter
+from scrapy.pipelines.images import ImagesPipeline
 
 
 class GetchuPipeline:
@@ -96,10 +97,16 @@ class MyImagesPipeline(ImagesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
         getchu_id = item['getchu_id']
         origin_filename = request.url.split('/')[-1]
-        return f'{getchu_id}/{origin_filename}'
+        # 目录按照时间来分类
+        on_sale = item['on_sale']
+        if not on_sale:
+            raise scrapy_exceptions.DropItem("parse on_sale failed")
+        #  按照年/月/id的文件夹形式归档
+        datepath = datetime.strptime(on_sale, r'%Y/%m/%d').strftime(r'%Y/%m')
+        return f'{datepath}/{getchu_id}/{origin_filename}'
 
     def item_completed(self, results, item, info):
-        image_paths = [x["path"] for ok, x in results if ok]
-        if not image_paths:
-            raise scrapy_exceptions.DropItem("Item contains no images")
+        # image_paths = [x["path"] for ok, x in results if ok]
+        # if not image_paths:
+        #     raise scrapy_exceptions.DropItem("Item contains no images")
         return item
