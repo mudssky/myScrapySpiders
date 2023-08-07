@@ -37,7 +37,7 @@ class getchuIDSpider(scrapy.Spider):
         self.db = self.client[self.mongo_db]
         self.collection = self.db[self.mongo_collection_name]
 
-    def id_filter(*type):
+    def id_filter(type):
         def decorator(func):
             def wrapper(self, *args, **kwargs):
                 input_ids = func(self, *args, **kwargs)
@@ -56,6 +56,10 @@ class getchuIDSpider(scrapy.Spider):
                     yield from (id for id in input_ids if id not in except_ids)
                 else:
                     raise CloseSpider('no id filter matched,type :{0}'.format(type))
+
+            return wrapper
+
+        return decorator
 
     def get_ids(self):
         for id in range(self.start_id, self.end_id):
