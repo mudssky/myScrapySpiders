@@ -5,6 +5,7 @@
 
 import scrapy
 from scrapy.loader import ItemLoader
+from scrapy.loader.processors import TakeFirst
 
 
 class DlsiteItem(scrapy.Item):
@@ -45,4 +46,5 @@ class DoujinItem(DlsiteItem):
 
 
 class DlsiteItemLoader(ItemLoader):
+    # default_output_processor = TakeFirst()
     pass

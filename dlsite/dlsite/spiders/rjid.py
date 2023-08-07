@@ -46,8 +46,9 @@ class RjidSpider(scrapy.Spider):
 
     def parse(self, response):
         l = dlsite_item.ItemLoader(item=dlsite_item.DlsiteItem(), response=response)
-        work_right = l.nest('//div[@id="work_right"]')
-        work_right.add_xpath('on_sale','//work_outline')
-        json.dumps()
+        # work_right = l.nest('//div[@id="work_right"]')
+        # work_right.add_xpath('on_sale','//work_outline')
+        work_outline=l.nested_xpath('//table[@id="work_outline"]')
+        work_outline.add_xpath('on_sale','//th[contains(text(),"販売日")]/following-sibling::td/a/text()')
         l.add_value('product_id',response.meta.get('product_id'))
-        pass
+        return l.load_item()
