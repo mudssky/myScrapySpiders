@@ -23,7 +23,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 32
+# CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -68,7 +68,7 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
     # "getchu.pipelines.GetchuPipeline": 300,
     "getchu.pipelines.GetchuPipeline": 300,
-    # 'getchu.pipelines.MongoUpsertPipeline': 800,
+    'getchu.pipelines.MongoUpsertPipeline': 800,
     'getchu.pipelines.MyImagesPipeline': 900,
 }
 
@@ -82,7 +82,7 @@ AUTOTHROTTLE_ENABLED = True
 # AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-AUTOTHROTTLE_TARGET_CONCURRENCY = 16.0
+# AUTOTHROTTLE_TARGET_CONCURRENCY = 16.0
 # AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
