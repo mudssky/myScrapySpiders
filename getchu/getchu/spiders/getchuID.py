@@ -69,7 +69,38 @@ class getchuIDSpider(scrapy.Spider):
 
         return wrapper
 
-    # @unknown_id_filter
+    def other_id_filter(func):
+        """过滤出unknown项目中的other id
+
+        Args:
+            func (_type_): _description_
+        """
+
+        def wrapper(self, *args, **kwargs):
+            input_ids = func(self, *args, **kwargs)
+            other_ids = {x['getchu_id'] for x in self.collection.find({'tab_type': 'unknown', 'res_body_size': {'$gt': 2000}})}
+            for id in input_ids:
+                if id in other_ids:
+                    yield id
+
+        return wrapper
+
+    def game_id_filter(func):
+        """过滤出unknown项目中的other id
+
+        Args:
+            func (_type_): _description_
+        """
+
+        def wrapper(self, *args, **kwargs):
+            input_ids = func(self, *args, **kwargs)
+            target_ids = {x['getchu_id'] for x in self.collection.find({'tab_type': 'game'})}
+            for id in input_ids:
+                if id in target_ids:
+                    yield id
+
+        return wrapper
+
     def get_ids(self):
         for id in range(self.start_id, self.end_id):
             yield id
@@ -252,7 +283,7 @@ class getchuIDSpider(scrapy.Spider):
                 '//div[contains(@class,"tabletitle") and contains(text(),"スタッフ")]/following-sibling::div[1]//text()',
             )
             return l.load_item()
-        elif tab_type == 'music' or tab_type == 'goods' or tab_type == 'dakimakura' or tab_type == 'books' or tab_type == 'top':
+        elif tab_type == 'music' or tab_type == 'goods' or tab_type == 'dakimakura' or tab_type == 'books' or tab_type == 'top' or tab_type == 'other':
             if tab_type == 'music':
                 l = getchu_item.MusicItemLoader(item=getchu_item.MusicItem(), response=response)
             elif tab_type == 'goods':
@@ -267,6 +298,8 @@ class getchuIDSpider(scrapy.Spider):
                     'ISBN_13',
                     '//td[contains(text(),"ISBN-13")]/following-sibling::td/text()',
                 )
+            elif tab_type == 'other':
+                l = getchu_item.GameItemLoader(item=getchu_item.GetchuItem(), response=response)
             self.extract_common(response=response, loader=l)
             return l.load_item()
         elif tab_type == 'doujin' or tab_type == 'cosplay':
