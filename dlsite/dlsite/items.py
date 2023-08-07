@@ -4,6 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 import scrapy
+from scrapy.loader import ItemLoader
 
 
 class DlsiteItem(scrapy.Item):
@@ -14,7 +15,8 @@ class DlsiteItem(scrapy.Item):
     # cv_list=scrapy.Field()
     # 年齢指定
     # age_judge=scrapy.Field()
-
+    # rjid
+    product_id=scrapy.Field()
     # 販売日
     on_sale = scrapy.Field()
     # 年齢指定
@@ -40,3 +42,7 @@ class DlsiteItem(scrapy.Item):
 
 class DoujinItem(DlsiteItem):
     cv_list = scrapy.Field()
+
+
+class DlsiteItemLoader(ItemLoader):
+    pass

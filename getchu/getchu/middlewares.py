@@ -88,6 +88,11 @@ class GetchuDownloaderMiddleware:
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
+
+        # 不缓存空白页面
+        if response.body:
+            if len(response.body) < 2000:
+                request.meta['dont_cache'] = True
         return response
 
     def process_exception(self, request, exception, spider):

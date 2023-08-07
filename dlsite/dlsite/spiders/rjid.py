@@ -1,14 +1,17 @@
+import json
+
 import scrapy
 from scrapy.exceptions import CloseSpider
+from .. import items as dlsite_item
+from scrapy.utils.request import  fingerprint
 
-
-class rjidSpider(scrapy.Spider):
+class RjidSpider(scrapy.Spider):
     name = 'rjid'
     allowed_domains = ['www.dlsite.com']
 
     def __init__(self, start_id=1, end_id=None, *args, **kwargs):
         # 调用父类的构造函数
-        super(rjidSpider, self).__init__(*args, **kwargs)
+        super(RjidSpider, self).__init__(*args, **kwargs)
 
         self.start_id = int(start_id)
         if end_id is None:
@@ -38,8 +41,13 @@ class rjidSpider(scrapy.Spider):
     def start_requests(self):
         for rjid in self.get_rjid_list():
             getchu_url = f'https://www.dlsite.com/maniax/work/=/product_id/{rjid}.html'
-            metaDict = {"rjid": rjid}
+            metaDict = {"product_id": rjid}
             yield scrapy.Request(getchu_url, callback=self.parse, meta=metaDict)
 
     def parse(self, response):
+        l = dlsite_item.ItemLoader(item=dlsite_item.DlsiteItem(), response=response)
+        work_right = l.nest('//div[@id="work_right"]')
+        work_right.add_xpath('on_sale','//work_outline')
+        json.dumps()
+        l.add_value('product_id',response.meta.get('product_id'))
         pass
