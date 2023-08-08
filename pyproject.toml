@@ -9,9 +9,6 @@ readme = "README.md"
 [tool.black]
 skip-string-normalization = true
 
-[tool.ruff]
-line-length = 200
-
 [tool.poetry.dependencies]
 python = "^3.11"
 ipython = "^8.14.0"

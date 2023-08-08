@@ -99,8 +99,6 @@ class MyImagesPipeline(ImagesPipeline):
         origin_filename = request.url.split('/')[-1]
         # 目录按照时间来分类
         on_sale = item['on_sale']
-        if not on_sale:
-            raise scrapy_exceptions.DropItem("parse on_sale failed")
         #  按照年/月/id的文件夹形式归档
         datepath = datetime.strptime(on_sale, r'%Y/%m/%d').strftime(r'%Y/%m')
         return f'{datepath}/{getchu_id}/{origin_filename}'

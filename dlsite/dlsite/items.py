@@ -6,6 +6,47 @@
 import scrapy
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import TakeFirst
+import re
+from itemloaders.processors import TakeFirst, MapCompose, Identity, Join
+from datetime import datetime
+
+
+def get_maker_id(maker_url):
+    if maker_url:
+        result = re.match(r'.*maker_id/(?P<maker_id>.+?)\.html', maker_url)
+        return result.group('maker_id')
+    return None
+
+
+def get_price(price_str: str):
+    if price_str:
+        clean_price = price_str.replace(',', '')
+        return float(clean_price)
+    return None
+
+
+def get_cover_url(cover_url: str):
+    if cover_url:
+        if cover_url.startswith('//'):
+            return cover_url[2:]
+    return cover_url
+
+
+def get_on_sale(on_sale_str):
+    if on_sale_str:
+        time_str = re.match(r'(\d+年\d+月\d+日).*', on_sale_str).group(1)
+        if time_str:
+            time_res = datetime.strptime(time_str, '%Y年%m月%d日')
+            return time_res
+    return None
+
+
+def filter_blank_str(text):
+    if text:
+        if text.strip() != '':
+            return text
+
+    return None
 
 
 class DlsiteItem(scrapy.Item):
@@ -17,7 +58,9 @@ class DlsiteItem(scrapy.Item):
     # 年齢指定
     # age_judge=scrapy.Field()
     # rjid
-    product_id=scrapy.Field()
+    product_id = scrapy.Field()
+    # 作品名
+    work_name = scrapy.Field()
     # 販売日
     on_sale = scrapy.Field()
     # 年齢指定
@@ -25,20 +68,44 @@ class DlsiteItem(scrapy.Item):
     #    サークル名
     circle_name = scrapy.Field()
     # ブランド名
-    brand_name = scrapy.Field()
+    # brand_name = scrapy.Field()
     maker_id = scrapy.Field()
     # 作品形式
     work_genre = scrapy.Field()
 
+    # シナリオ
+    scenario_list = scrapy.Field()
+    # イラスト
+    illustrator_list = scrapy.Field()
+    # 声優
+    cv_list = scrapy.Field()
     # ファイル形式	MP3/ wav同梱
     file_type = scrapy.Field()
     # ジャンル
     genre = scrapy.Field()
+
     # ファイル容量
     file_capcity = scrapy.Field()
+    # イベント
+    event = scrapy.Field()
 
     cover_url = scrapy.Field()
-    pass
+    price = scrapy.Field()
+    price_without_tax = scrapy.Field()
+    # 対応言語
+    language_supports = scrapy.Field()
+    intro = scrapy.Field()
+
+    # 下面是作品相关实时性高的数据
+    # 平均打分两位小数
+    rate_average_2dp = scrapy.Field()
+    # 打分数
+    rate_count = scrapy.Field()
+    dl_count = scrapy.Field()
+    wishlist_count = scrapy.Field()
+
+    updated_at = scrapy.Field()
+    review_count = scrapy.Field()
 
 
 class DoujinItem(DlsiteItem):
@@ -46,5 +113,20 @@ class DoujinItem(DlsiteItem):
 
 
 class DlsiteItemLoader(ItemLoader):
-    # default_output_processor = TakeFirst()
-    pass
+    default_output_processor = TakeFirst()
+    # maker_id_in = MapCompose(get_maker_id)
+    on_sale_in = MapCompose(get_on_sale)
+    # creator_out = Identity()
+    scenario_list_out = Identity()
+    illustrator_list_out = Identity()
+    cv_list_out = Identity()
+    file_type_out = Identity()
+    genre_out = Identity()
+    work_genre_out = Identity()
+    file_capcity_in = MapCompose(str.strip)
+    # price_in = MapCompose(get_price)
+    language_supports_out = Identity()
+    intro_in = MapCompose(str.strip)
+    # intro_in = MapCompose(filter_blank_str)
+    intro_out = Join('\n')
+    cover_url_in = MapCompose(get_cover_url)

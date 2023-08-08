@@ -3,7 +3,7 @@ import json
 import scrapy
 from scrapy.exceptions import CloseSpider
 from .. import items as dlsite_item
-from scrapy.utils.request import  fingerprint
+
 
 class RjidSpider(scrapy.Spider):
     name = 'rjid'
@@ -40,15 +40,101 @@ class RjidSpider(scrapy.Spider):
 
     def start_requests(self):
         for rjid in self.get_rjid_list():
-            getchu_url = f'https://www.dlsite.com/maniax/work/=/product_id/{rjid}.html'
+            getchu_url = f'https://www.dlsite.com/maniax/work/=/product_id/{rjid}.html/?locale=ja_JP'
             metaDict = {"product_id": rjid}
             yield scrapy.Request(getchu_url, callback=self.parse, meta=metaDict)
 
     def parse(self, response):
-        l = dlsite_item.ItemLoader(item=dlsite_item.DlsiteItem(), response=response)
+        l = dlsite_item.DlsiteItemLoader(
+            item=dlsite_item.DlsiteItem(), response=response
+        )
         # work_right = l.nest('//div[@id="work_right"]')
         # work_right.add_xpath('on_sale','//work_outline')
-        work_outline=l.nested_xpath('//table[@id="work_outline"]')
-        work_outline.add_xpath('on_sale','//th[contains(text(),"販売日")]/following-sibling::td/a/text()')
-        l.add_value('product_id',response.meta.get('product_id'))
+        l.add_xpath('work_name', '//h1[@id="work_name"]/text()')
+        work_right = l.nested_xpath('//div[@id="work_right"]')
+        work_right.add_xpath(
+            'circle_name', '//span[contains(@class,"maker_name")]/a/text()'
+        )
+        work_right.add_xpath(
+            'maker_id', '//span[contains(@class,"maker_name")]/a/@href'
+        )
+        # 表格
+        work_outline = work_right.nested_xpath('//table[@id="work_outline"]')
+        work_outline.add_xpath(
+            'on_sale', '//th[contains(text(),"販売日")]/following-sibling::td/a/text()'
+        )
+        work_outline.add_xpath(
+            'scenario_list',
+            '//th[contains(text(),"シナリオ")]/following-sibling::td//a/text()',
+        )
+        work_outline.add_xpath(
+            'illustrator_list',
+            '//th[contains(text(),"イラスト")]/following-sibling::td//a/text()',
+        )
+        work_outline.add_xpath(
+            'cv_list',
+            '//th[contains(text(),"声優")]/following-sibling::td//a/text()',
+        )
+        work_outline.add_xpath(
+            'age_judge',
+            '//th[contains(text(),"年齢指定")]/following-sibling::td//a/span/text()',
+        )
+        work_outline.add_xpath(
+            'work_genre',
+            '//th[contains(text(),"作品形式")]/following-sibling::td//a/span/text()',
+        )
+        work_outline.add_xpath(
+            'file_type',
+            '//th[contains(text(),"ファイル形式")]/following-sibling::td//a/span/text()',
+        )
+        work_outline.add_xpath(
+            'event',
+            '//th[contains(text(),"イベント")]/following-sibling::td//a/text()',
+        )
+        work_outline.add_xpath(
+            'genre',
+            '//th[contains(text(),"ジャンル")]/following-sibling::td//a/text()',
+        )
+        work_outline.add_xpath(
+            'file_capcity',
+            '//th[contains(text(),"ファイル容量")]/following-sibling::td//div/text()',
+        )
+        work_outline.add_xpath(
+            'language_supports',
+            '//th[contains(text(),"対応言語")]/following-sibling::td//a/span/text()',
+        )
+        # right = l.nested_xpath('//div[@id="right"]')
+        # right.add_xpath(
+        #     'price',
+        #     '//div[contains(text(),"価格") and contains(@class , "work_buy_label")]/following-sibling::div//span/text()',
+        # )
+
+        l.add_xpath('intro', '//div[contains(@class,"work_parts_container")]//text()')
+        l.add_xpath(
+            'cover_url',
+            '//div[contains(@class,"work_slider_container")]//li//source/@srcset',
+        )
+        l.add_value('product_id', response.meta.get('product_id'))
+        # return l.load_item()
+        meta_data = response.meta.copy()
+        meta_data['loader'] = l
+        yield scrapy.Request(
+            f'https://www.dlsite.com/maniax/product/info/ajax?product_id={ response.meta.get("product_id")}&cdn_cache_min=1',
+            callback=self.parse_info_json,
+            meta=meta_data,
+        )
+
+    def parse_info_json(self, response):
+        res = response.json().get(response.meta.get('product_id'))
+        # print(res, response.meta.get('product_id'), response.meta)
+        l = response.meta.get('loader')
+        if res:
+            l.add_value('price', res.get('price'))
+            l.add_value('price_without_tax', res.get('price_without_tax'))
+            l.add_value('rate_average_2dp', res.get('rate_average_2dp'))
+            l.add_value('rate_count', res.get('rate_count'))
+            l.add_value('maker_id', res.get('maker_id'))
+            l.add_value('dl_count', res.get('dl_count'))
+            l.add_value('wishlist_count', res.get('wishlist_count'))
+            l.add_value('review_count', res.get('review_count'))
         return l.load_item()
