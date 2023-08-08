@@ -148,7 +148,7 @@ class GameItemLoader(GetchuItemLoader):
     system_requirements_in = join_and_strip
     story_in = join_and_strip
     # story_in=debug_processor
-    # strory_out=Identity()
+    # story_out=Identity()
     musician_list_out = Identity()
     chara_list_out = Identity()
 
