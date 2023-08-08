@@ -23,7 +23,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 64
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -66,7 +66,6 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    # "getchu.pipelines.GetchuPipeline": 300,
     # "dlsite.pipelines.DlsitePipeline": 300,
     'dlsite.pipelines.MongoUpsertPipeline': 800,
     'dlsite.pipelines.MyImagesPipeline': 900,
@@ -77,12 +76,12 @@ IMAGES_STORE = '.scrapy/images'
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-# AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 0.1
 # The maximum download delay to be set in case of high latencies
 # AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 16.0
+AUTOTHROTTLE_TARGET_CONCURRENCY = 64.0
 # AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
@@ -103,7 +102,8 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 # log config
 # LOG_FILE = 'getchu.log'
-LOG_LEVEL = 'DEBUG'
+# LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'INFO'
 LOG_FILE_APPEND = True
 # LOG_FORMATTER = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
 LOG_ENABLED = True

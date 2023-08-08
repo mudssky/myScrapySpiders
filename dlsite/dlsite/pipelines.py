@@ -60,24 +60,40 @@ class MyImagesPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
         adapter = ItemAdapter(item)
         url_list = []
-        cover_url = adapter.get('cover_url')
-        if cover_url:
-            url_list.append(cover_url)
+        # logger=info.spider.logger
+        # print(
+        #     'referer',
+        #     info.spider.name,
+        #     # info.spider.get_detail_url,
+        #     info.spider.get_detail_url(adapter.get('product_id')),
+        # )
+        # cover_url = adapter.get('cover_url')
+        # if cover_url:
+        #     url_list.append(cover_url)
+        if adapter.get('sample_img_list'):
+            url_list += adapter.get('sample_img_list')
+        if adapter.get('intro_img_list'):
+            url_list += adapter.get('intro_img_list')
         for url in url_list:
             yield scrapy.Request(
                 f'https://{url}',
-                meta={'cache_ignore': True},
+                headers={
+                    'referer': info.spider.get_detail_url(adapter.get('product_id')),
+                },
+                meta={
+                    'dont_cache': True,
+                },
             )
 
     def file_path(self, request, response=None, info=None, *, item=None):
         product_id = item['product_id']
-        # origin_filename = request.url.split('/')[-1]
+        origin_filename = request.url.split('/')[-1]
         # 目录按照时间来分类
         on_sale = item['on_sale']
-        ext_name = request.url.split('.')[-1]
+        # ext_name = request.url.split('.')[-1]
         #  按照年/月/id的文件夹形式归档
         datepath = on_sale.strftime(r'%Y/%m')
-        return f'{datepath}/{product_id}_{utils.generate_md5(request.url)}.{ext_name}'
+        return f'{datepath}/{product_id}/{origin_filename}'
 
     def item_completed(self, results, item, info):
         # image_paths = [x["path"] for ok, x in results if ok]

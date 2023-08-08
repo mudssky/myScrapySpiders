@@ -91,7 +91,7 @@ class MyImagesPipeline(ImagesPipeline):
                     headers={
                         'referer': f'https://www.getchu.com/soft.phtml?id={adapter.get("getchu_id")}'
                     },
-                    meta={'cache_ignore': True},
+                    meta={'dont_cache': True},
                 )
 
     def file_path(self, request, response=None, info=None, *, item=None):

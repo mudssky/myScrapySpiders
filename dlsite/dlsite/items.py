@@ -96,6 +96,8 @@ class DlsiteItem(scrapy.Item):
     language_supports = scrapy.Field()
     intro = scrapy.Field()
 
+    other_info = scrapy.Field()
+
     # 下面是作品相关实时性高的数据
     # 平均打分两位小数
     rate_average_2dp = scrapy.Field()
@@ -106,6 +108,17 @@ class DlsiteItem(scrapy.Item):
 
     updated_at = scrapy.Field()
     review_count = scrapy.Field()
+    sample_img_list = scrapy.Field()
+    intro_img_list = scrapy.Field()
+
+    # 下面是漫画不一样的
+    # 漫画存在作者
+    author_list = scrapy.Field()
+    page_count = scrapy.Field()
+
+    # 游戏
+    # シリーズ名
+    series_name = scrapy.Field()
 
 
 class DoujinItem(DlsiteItem):
@@ -130,3 +143,12 @@ class DlsiteItemLoader(ItemLoader):
     # intro_in = MapCompose(filter_blank_str)
     intro_out = Join('\n')
     cover_url_in = MapCompose(get_cover_url)
+    intro_img_list_in = MapCompose(get_cover_url)
+    sample_img_list_in = MapCompose(get_cover_url)
+    sample_img_list_out = Identity()
+    intro_img_list_out = Identity()
+    other_info_out = Identity()
+
+    # 漫画
+    author_list_out = Identity()
+    page_count_in = MapCompose(str.strip)
