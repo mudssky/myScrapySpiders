@@ -165,12 +165,20 @@ class RjidSpider(scrapy.Spider):
         meta_data['loader'] = l
 
         rjid_str = response.meta.get("product_id")
-        # 判断是否是翻译页面
-        matched = re.match(r'.*(?P<rjid_str>RJ\d+)\.html.*translation.*', response.url)
-        if matched:
-            self.logger.debug(f'is translation :{response.url}')
-            rjid_str = matched.group('rjid_str')
-            l.add_value('translation_id', rjid_str)
+
+        # 判断是否是翻译页面 # 判断是否是翻译页面
+        trans_path = response.xpath(
+            '//ul[contains(@class,"work_feature")]//div[@id="work_trans"]'
+        )
+        if trans_path:
+            # 第一个就是最初的语言，一般是日语
+            origin_url = response.xpath(
+                '//ul[contains(@class,"work_edition")]//*[contains(@class,"work_edition")]/a/@href'
+            ).get()
+            matched = re.match(r'.*(?P<rjid_str>RJ\d+)\.html.*', origin_url)
+            if matched:
+                rjid_str = matched.group('rjid_str')
+                l.add_value('translation_id', rjid_str)
         yield scrapy.Request(
             f'https://www.dlsite.com/maniax/product/info/ajax?product_id={ rjid_str}&cdn_cache_min=1',
             callback=self.parse_info_json,
