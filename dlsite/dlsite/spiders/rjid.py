@@ -168,13 +168,12 @@ class RjidSpider(scrapy.Spider):
 
         # 判断是否是翻译页面 # 判断是否是翻译页面
         trans_path = response.xpath(
-            '//ul[contains(@class,"work_feature")]//div[@id="work_trans"]'
+            '//ul[contains(@class,"work_edition")]//*[contains(@class,"work_edition")]/a/@href'
         )
         if trans_path:
+            # self.logger.debug('trans_path', trans_path.get())
             # 第一个就是最初的语言，一般是日语
-            origin_url = response.xpath(
-                '//ul[contains(@class,"work_edition")]//*[contains(@class,"work_edition")]/a/@href'
-            ).get()
+            origin_url = trans_path.get()
             matched = re.match(r'.*(?P<rjid_str>RJ\d+)\.html.*', origin_url)
             if matched:
                 rjid_str = matched.group('rjid_str')
