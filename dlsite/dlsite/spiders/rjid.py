@@ -28,7 +28,7 @@ class RjidSpider(scrapy.Spider):
 
     @staticmethod
     def extract_rjid_num(rjid_str):
-        res = re.match(r'(RJ)?0+(?P<rjid_num>\d+)', rjid_str)
+        res = re.match(r'(RJ)?(0+)?(?P<rjid_num>\d+)', rjid_str)
         return int(res.group('rjid_num'))
 
     def get_rjid_str(self, rjid_num: int):
