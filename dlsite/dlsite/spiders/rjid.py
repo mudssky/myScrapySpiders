@@ -20,7 +20,7 @@ class RjidSpider(scrapy.Spider):
         else:
             self.end_id = self.extract_rjid_num(end_id)
 
-        self.logger.debug(f'start_id: {start_id} ,end_id: {end_id}')
+        self.logger.info(f'start_id: {start_id} ,end_id: {end_id}')
         self.validate_argument()
         # 分成两段，6位id时期和8位id时期。
         # RJ001016 RJ441531
@@ -163,13 +163,22 @@ class RjidSpider(scrapy.Spider):
         # return l.load_item()
         meta_data = response.meta.copy()
         meta_data['loader'] = l
+
+        rjid_str = response.meta.get("product_id")
+        # 判断是否是翻译页面
+        matched = re.match(r'.*(?P<rjid_str>RJ\d+)\.html.*translation.*', response.url)
+        if matched:
+            self.logger.debug(f'is translation :{response.url}')
+            rjid_str = matched.group('rjid_str')
+            l.add_value('translation_id', rjid_str)
         yield scrapy.Request(
-            f'https://www.dlsite.com/maniax/product/info/ajax?product_id={ response.meta.get("product_id")}&cdn_cache_min=1',
+            f'https://www.dlsite.com/maniax/product/info/ajax?product_id={ rjid_str}&cdn_cache_min=1',
             callback=self.parse_info_json,
             meta=meta_data,
         )
 
     def parse_info_json(self, response):
+        # self.logger.debug("Visited %s", response.url)
         res = response.json().get(response.meta.get('product_id'))
         # print(res, response.meta.get('product_id'), response.meta)
         l = response.meta.get('loader')

@@ -120,6 +120,10 @@ class DlsiteItem(scrapy.Item):
     # シリーズ名
     series_name = scrapy.Field()
 
+    # 针对翻译作品
+    # 原作的id
+    translation_id = scrapy.Field()
+
 
 class DoujinItem(DlsiteItem):
     cv_list = scrapy.Field()
