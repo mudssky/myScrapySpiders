@@ -60,20 +60,15 @@ class MyImagesPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
         adapter = ItemAdapter(item)
         url_list = []
-        # logger=info.spider.logger
-        # print(
-        #     'referer',
-        #     info.spider.name,
-        #     # info.spider.get_detail_url,
-        #     info.spider.get_detail_url(adapter.get('product_id')),
-        # )
-        # cover_url = adapter.get('cover_url')
-        # if cover_url:
-        #     url_list.append(cover_url)
-        if adapter.get('sample_img_list'):
-            url_list += adapter.get('sample_img_list')
-        if adapter.get('intro_img_list'):
-            url_list += adapter.get('intro_img_list')
+        # 只保存包含声优的日语项目的全部图片，其他项目只保存封面图
+        if adapter.get('cv_list') and (not adapter.get('translation_id')):
+            if adapter.get('sample_img_list'):
+                url_list += adapter.get('sample_img_list')
+            if adapter.get('intro_img_list'):
+                url_list += adapter.get('intro_img_list')
+        else:
+            if adapter.get('cover_url'):
+                url_list.append(adapter.get('cover_url'))
         for url in url_list:
             yield scrapy.Request(
                 f'https://{url}',
