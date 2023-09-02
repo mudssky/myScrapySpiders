@@ -103,7 +103,7 @@ FEED_EXPORT_ENCODING = "utf-8"
 # log config
 # LOG_FILE = 'getchu.log'
 # LOG_LEVEL = 'DEBUG'
-# LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'INFO'
 LOG_FILE_APPEND = True
 # LOG_FORMATTER = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
 LOG_ENABLED = True
