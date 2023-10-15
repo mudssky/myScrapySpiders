@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "prepare": "poetry shell",
+    "crawl": "scrapy crawl getchuID  -s JOBDIR=.scrapy/jobdir/rjid14 -a start_id=1228799  -a end_id=1232471"
+  }
+}
