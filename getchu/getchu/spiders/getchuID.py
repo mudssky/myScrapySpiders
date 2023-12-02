@@ -72,6 +72,7 @@ class getchuIDSpider(scrapy.Spider):
 
         return decorator
 
+    # @id_filter('not_in_db')
     def get_ids(self):
         for id in range(self.start_id, self.end_id):
             yield id
